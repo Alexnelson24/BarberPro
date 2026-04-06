@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barber Pro | Administración Premium</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-scissors"></i>
+            BarberPro
+        </div>
+        
+        <div class="nav-item active" data-section="dashboard">
+            <i class="fas fa-chart-line"></i> Dashboard
+        </div>
+        <div class="nav-item" data-section="caja">
+            <i class="fas fa-cash-register"></i> Caja (Apertura/Cierre)
+        </div>
+        <div class="nav-item" data-section="reservas">
+            <i class="fas fa-calendar-check"></i> Reservas
+        </div>
+        <div class="nav-item" data-section="servicios">
+            <i class="fas fa-cut"></i> Servicios
+        </div>
+        <div class="nav-item" data-section="ventas">
+            <i class="fas fa-shopping-cart"></i> Ventas & POS
+        </div>
+        <div class="nav-item" data-section="barberos">
+            <i class="fas fa-user-friends"></i> Barberos
+        </div>
+        <div class="nav-item" data-section="barber-types">
+            <i class="fas fa-id-badge"></i> Niveles/Tipos
+        </div>
+        <div class="nav-item" data-section="clientes">
+            <i class="fas fa-users-viewfinder"></i> Clientes & Puntos
+        </div>
+        <div class="nav-item" data-section="reportes">
+            <i class="fas fa-file-invoice-dollar"></i> Reportes Diarios
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <h1 id="section-title">Dashboard</h1>
+            <div id="register-status" class="badge badge-pending">Caja Cerrada</div>
+        </header>
+
+        <!-- DASHBOARD SECTION -->
+        <section id="dashboard" class="section">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <h3>Ventas Hoy</h3>
+                    <p class="value" id="kpi-sales">Bs. 0.00</p>
+                </div>
+                <div class="kpi-card">
+                    <h3>Reservas Pendientes</h3>
+                    <p class="value" id="kpi-bookings">0</p>
+                </div>
+                <div class="kpi-card">
+                    <h3>Comisiones Acumuladas</h3>
+                    <p class="value" id="kpi-commissions">Bs. 0.00</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Próximas Citas</h3>
+                <div class="table-container">
+                    <table id="upcoming-reservas-table">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Hora</th>
+                                <th>Servicio</th>
+                                <th>Barbero</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Contenido dinámico -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- CAJA SECTION -->
+        <section id="caja" class="section hidden">
+            <div class="card">
+                <h3>Control de Caja</h3>
+                <div id="caja-session-info" class="hidden">
+                    <p>Sesión Abierta por: <span id="session-user">Administrador</span></p>
+                    <p>Monto Inicial: <span id="session-initial-amount"></span></p>
+                    <p>Ventas Actuales: <span id="session-current-sales"></span></p>
+                    <button class="btn btn-danger" onclick="app.closeRegister()">Cerrar Caja</button>
+                </div>
+                <div id="caja-open-form">
+                    <p>No hay una sesión de caja abierta. Inicie una para comenzar a facturar.</p>
+                    <div style="max-width: 300px; margin-top: 1rem;">
+                        <label>Monto Inicial</label>
+                        <input type="number" id="initial-amount-input" value="0">
+                        <button class="btn btn-primary" onclick="app.openRegister()">Abrir Caja</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Historial de Cierres</h3>
+                <div class="table-container">
+                    <table id="caja-history">
+                        <thead>
+                            <tr>
+                                <th>Fecha Realiación</th>
+                                <th>Monto Inicial</th>
+                                <th>Ventas Totales</th>
+                                <th>Monto Final</th>
+                                <th>Diferencia</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESERVAS SECTION -->
+        <section id="reservas" class="section hidden">
+            <div class="card">
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1rem;">
+                    <h3>Gestión de Reservas</h3>
+                    <button class="btn btn-primary" onclick="app.showModal('booking')">+ Nueva Reserva</button>
+                </div>
+                <div class="table-container">
+                    <table id="reservas-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha/Hora</th>
+                                <th>Cliente</th>
+                                <th>Servicio</th>
+                                <th>Barbero</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SERVICIOS SECTION -->
+        <section id="servicios" class="section hidden">
+            <div class="card">
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1rem;">
+                    <h3>Catálogo de Servicios</h3>
+                    <button class="btn btn-primary" onclick="app.showModal('service')">+ Nuevo Servicio</button>
+                </div>
+                <div class="table-container">
+                    <table id="servicios-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Duración (min)</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VENTAS SECTION -->
+        <section id="ventas" class="section hidden">
+            <div class="card">
+                <h3>Venta y Facturación (POS)</h3>
+                <div id="pos-alert" class="badge badge-pending hidden" style="margin-bottom: 1rem;">
+                    Debe abrir la caja para realizar ventas.
+                </div>
+                <div class="form-grid">
+                    <div>
+                        <label>Seleccionar Servicio/Producto</label>
+                        <select id="pos-item-select"></select>
+                        <label>Barbero</label>
+                        <select id="pos-barber-select"></select>
+                        <label>Cliente (Buscar o Crear)</label>
+                        <select id="pos-client-select"></select>
+                        <input type="text" id="pos-client-name" placeholder="O escribir nombre nuevo">
+                        <button class="btn btn-primary" onclick="app.addToCart()">Agregar</button>
+                    </div>
+                    <div style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1.5rem;">
+                        <h4>Carrito</h4>
+                        <div id="cart-list" style="margin: 1rem 0;"></div>
+                        <div style="display:flex; justify-content: space-between; font-weight: 800; font-size: 1.25rem;">
+                            <span>Total</span>
+                            <span id="pos-total-amount">Bs. 0.00</span>
+                        </div>
+                        <button class="btn btn-primary" style="margin-top: 1rem; width: 100%;" onclick="app.processSale()">Finalizar Venta</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BARBEROS SECTION -->
+        <section id="barberos" class="section hidden">
+            <div class="card">
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1rem;">
+                    <h3>Plantilla de Barberos</h3>
+                    <button class="btn btn-primary" onclick="app.showModal('barber')">+ Agregar Barbero</button>
+                </div>
+                <div class="table-container">
+                    <table id="barberos-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Nivel / Rango</th>
+                                <th>Comisiones Acumuladas</th>
+                                <th>Ventas Realizadas</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- BARBER TYPES SECTION -->
+        <section id="barber-types" class="section hidden">
+            <div class="card">
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1rem;">
+                    <h3>Tipos/Niveles de Barbero</h3>
+                    <button class="btn btn-primary" onclick="app.showModal('barberType')">+ Nuevo Tipo</button>
+                </div>
+                <div class="table-container">
+                    <table id="barber-types-table">
+                        <thead>
+                            <tr>
+                                <th>Nivel / Rango</th>
+                                <th>% Comisión Base</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- CLIENTES SECTION -->
+        <section id="clientes" class="section hidden">
+            <div class="card">
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1rem;">
+                    <h3>Fidelización de Clientes</h3>
+                    <button class="btn btn-primary" onclick="app.showModal('client')">+ Nuevo Cliente</button>
+                </div>
+                <div class="table-container">
+                    <table id="clientes-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Puntos Acumulados</th>
+                                <th>Última Visita</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- REPORTES SECTION -->
+        <section id="reportes" class="section hidden">
+            <div class="card">
+                <h3>Resumen Mensual y Diario</h3>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <h3>Ventas Mes</h3>
+                        <p class="value" id="monthly-sales">Bs. 0.00</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Total Servicios</h3>
+                        <p class="value" id="monthly-services-count">0</p>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="sales-history">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Concepto</th>
+                                <th>Monto</th>
+                                <th>Barbero</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODALES DINAMICOS -->
+    <div id="modal-container" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 id="modal-title">Formulario</h3>
+            <div id="modal-content"></div>
+            <div style="display:flex; gap: 10px; margin-top: 1.5rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="app.hideModal()">Cancelar</button>
+                <button class="btn btn-primary" id="modal-save-btn">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
