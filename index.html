@@ -7,318 +7,529 @@
     <link rel="stylesheet" href="style.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- AUTH OVERLAY -->
+    <div id="login-screen" class="login-overlay">
+        <div class="login-card">
+            <div class="logo"><i class="fas fa-scissors"></i></div>
+            <h2 style="margin-bottom: 24px;">BarberPro Login</h2>
+            <div style="text-align: left; margin-bottom: 16px;">
+                <label style="font-size: 0.8rem; color: var(--text-muted);">Usuario</label>
+                <input type="text" id="login-user" placeholder="admin / operario / cajera" style="margin-top: 4px;">
+            </div>
+            <div style="text-align: left; margin-bottom: 24px;">
+                <label style="font-size: 0.8rem; color: var(--text-muted);">Contraseña</label>
+                <input type="password" id="login-pass" value="1234" style="margin-top: 4px;">
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="app.login()">ENTRAR AL SISTEMA</button>
+        </div>
+    </div>
 
+    <!-- SIDEBAR -->
     <aside class="sidebar">
-        <div class="logo">
-            <i class="fas fa-scissors"></i>
-            BarberPro
+        <div class="sidebar-logo">
+            <i class="fas fa-scissors" style="color: var(--accent);"></i>
+            <span>BarberPro</span>
         </div>
-        
-        <div class="nav-item active" data-section="dashboard">
-            <i class="fas fa-chart-line"></i> Dashboard
-        </div>
-        <div class="nav-item" data-section="caja">
-            <i class="fas fa-cash-register"></i> Caja (Apertura/Cierre)
-        </div>
-        <div class="nav-item" data-section="reservas">
-            <i class="fas fa-calendar-check"></i> Reservas
-        </div>
-        <div class="nav-item" data-section="servicios">
-            <i class="fas fa-cut"></i> Servicios
-        </div>
-        <div class="nav-item" data-section="ventas">
-            <i class="fas fa-shopping-cart"></i> Ventas & POS
-        </div>
-        <div class="nav-item" data-section="barberos">
-            <i class="fas fa-user-friends"></i> Barberos
-        </div>
-        <div class="nav-item" data-section="barber-types">
-            <i class="fas fa-id-badge"></i> Niveles/Tipos
-        </div>
-        <div class="nav-item" data-section="clientes">
-            <i class="fas fa-users-viewfinder"></i> Clientes & Puntos
-        </div>
-        <div class="nav-item" data-section="reportes">
-            <i class="fas fa-file-invoice-dollar"></i> Reportes Diarios
-        </div>
+
+        <nav class="nav-group">
+            <div class="nav-item active" data-id="dashboard" onclick="app.showSection('dashboard')">
+                <i class="fas fa-th-large"></i> Dashboard
+            </div>
+            <div class="nav-item" data-id="pos" onclick="app.showSection('pos')">
+                <i class="fas fa-cash-register"></i> Ventas & POS
+            </div>
+            <div class="nav-item" data-id="reservas" onclick="app.showSection('reservas')">
+                <i class="fas fa-calendar-alt"></i> Reservas
+            </div>
+            <div class="nav-item" data-id="users" onclick="app.showSection('users')">
+                <i class="fas fa-user-shield"></i> Usuarios
+            </div>
+            <div class="nav-item" data-id="roles" onclick="app.showSection('roles')">
+                <i class="fas fa-key"></i> Roles & Permisos
+            </div>
+            <div class="nav-item" data-id="inventory" onclick="app.showSection('inventory')">
+                <i class="fas fa-box"></i> Inventario
+            </div>
+            <div class="nav-item" data-id="services" onclick="app.showSection('services')">
+                <i class="fas fa-cut"></i> Servicios
+            </div>
+            <div class="nav-item" data-id="reports" onclick="app.showSection('reports')">
+                <i class="fas fa-chart-line"></i> Reportes
+            </div>
+            <div class="nav-item" data-id="loyalty" onclick="app.showSection('loyalty')">
+                <i class="fas fa-star"></i> Fidelización
+            </div>
+            <div class="nav-item" data-id="clients" onclick="app.showSection('clients')">
+                <i class="fas fa-user-friends"></i> Clientes
+            </div>
+        </nav>
+
+            <div class="user-profile-nav">
+                <div class="user-avatar" id="current-user-initial">A</div>
+                <div style="flex:1; overflow:hidden;">
+                    <p id="current-user-name" style="font-size:0.85rem; font-weight:700; color:var(--text-main); white-space:nowrap; text-overflow:ellipsis;"></p>
+                    <p id="current-user-role" style="font-size:0.65rem; color:var(--primary); font-weight:800;"></p>
+                    <a href="javascript:void(0)" onclick="app.showModal('change-pass')" style="font-size:0.6rem; color:var(--text-muted); text-decoration:none;">CAMBIAR CLAVE</a>
+                </div>
+                <div class="nav-item" style="padding:10px; min-width:auto; margin:0;" onclick="app.logout()">
+                    <i class="fas fa-power-off"></i>
+                </div>
+            </div>
     </aside>
 
+    <!-- MAIN CONTENT -->
     <main class="main-content">
-        <header class="header">
-            <h1 id="section-title">Dashboard</h1>
-            <div id="register-status" class="badge badge-pending">Caja Cerrada</div>
+        <header class="top-bar">
+            <h2 id="view-title">DASHBOARD</h2>
+            <div style="display:flex; align-items:center; gap:20px;">
+                <div id="sync-status" style="font-size:0.65rem; color:var(--text-muted); display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-cloud"></i> <span id="sync-text">MODO LOCAL</span>
+                </div>
+                <div id="caja-control-ui" class="caja-status-pill">
+                    <div id="caja-dot" class="status-dot offline"></div>
+                    <span id="caja-text">Caja Cerrada</span>
+                    <button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.7rem; margin-left: 10px;" onclick="app.showSection('caja')">Gestionar</button>
+                </div>
+            </div>
         </header>
 
-        <!-- DASHBOARD SECTION -->
-        <section id="dashboard" class="section">
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <h3>Ventas Hoy</h3>
-                    <p class="value" id="kpi-sales">Bs. 0.00</p>
-                </div>
-                <div class="kpi-card">
-                    <h3>Reservas Pendientes</h3>
-                    <p class="value" id="kpi-bookings">0</p>
-                </div>
-                <div class="kpi-card">
-                    <h3>Comisiones Acumuladas</h3>
-                    <p class="value" id="kpi-commissions">Bs. 0.00</p>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>Próximas Citas</h3>
-                <div class="table-container">
-                    <table id="upcoming-reservas-table">
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Hora</th>
-                                <th>Servicio</th>
-                                <th>Barbero</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Contenido dinámico -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- CAJA SECTION -->
-        <section id="caja" class="section hidden">
-            <div class="card">
-                <h3>Control de Caja</h3>
-                <div id="caja-session-info" class="hidden">
-                    <p>Sesión Abierta por: <span id="session-user">Administrador</span></p>
-                    <p>Monto Inicial: <span id="session-initial-amount"></span></p>
-                    <p>Ventas Actuales: <span id="session-current-sales"></span></p>
-                    <button class="btn btn-danger" onclick="app.closeRegister()">Cerrar Caja</button>
-                </div>
-                <div id="caja-open-form">
-                    <p>No hay una sesión de caja abierta. Inicie una para comenzar a facturar.</p>
-                    <div style="max-width: 300px; margin-top: 1rem;">
-                        <label>Monto Inicial</label>
-                        <input type="number" id="initial-amount-input" value="0">
-                        <button class="btn btn-primary" onclick="app.openRegister()">Abrir Caja</button>
+        <div class="view-content">
+            <!-- DASHBOARD VIEW -->
+            <section id="dashboard" class="view-section">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3>Ventas Totales</h3>
+                        <p class="value" id="dash-sales">Bs. 0.00</p>
+                        <p class="sub-value" id="dash-sales-count">0 transacciones</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Servicios</h3>
+                        <p class="value" id="dash-services">0</p>
+                        <p class="sub-value" id="dash-services-bs">Bs. 0.00</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Productos</h3>
+                        <p class="value" id="dash-products">0</p>
+                        <p class="sub-value" id="dash-products-bs">Bs. 0.00</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Efectivo en Caja</h3>
+                        <p class="value" id="dash-caja">Bs. 0.00</p>
+                        <p class="sub-value">Sesión actual</p>
                     </div>
                 </div>
-            </div>
-            
-            <div class="card">
-                <h3>Historial de Cierres</h3>
-                <div class="table-container">
-                    <table id="caja-history">
-                        <thead>
-                            <tr>
-                                <th>Fecha Realiación</th>
-                                <th>Monto Inicial</th>
-                                <th>Ventas Totales</th>
-                                <th>Monto Final</th>
-                                <th>Diferencia</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
 
-        <!-- RESERVAS SECTION -->
-        <section id="reservas" class="section hidden">
-            <div class="card">
-                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1rem;">
-                    <h3>Gestión de Reservas</h3>
-                    <button class="btn btn-primary" onclick="app.showModal('booking')">+ Nueva Reserva</button>
-                </div>
-                <div class="table-container">
-                    <table id="reservas-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha/Hora</th>
-                                <th>Cliente</th>
-                                <th>Servicio</th>
-                                <th>Barbero</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- SERVICIOS SECTION -->
-        <section id="servicios" class="section hidden">
-            <div class="card">
-                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1rem;">
-                    <h3>Catálogo de Servicios</h3>
-                    <button class="btn btn-primary" onclick="app.showModal('service')">+ Nuevo Servicio</button>
-                </div>
-                <div class="table-container">
-                    <table id="servicios-table">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Precio</th>
-                                <th>Duración (min)</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- VENTAS SECTION -->
-        <section id="ventas" class="section hidden">
-            <div class="card">
-                <h3>Venta y Facturación (POS)</h3>
-                <div id="pos-alert" class="badge badge-pending hidden" style="margin-bottom: 1rem;">
-                    Debe abrir la caja para realizar ventas.
-                </div>
-                <div class="form-grid">
-                    <div>
-                        <label>Seleccionar Servicio/Producto</label>
-                        <select id="pos-item-select"></select>
-                        <label>Barbero</label>
-                        <select id="pos-barber-select"></select>
-                        <label>Cliente (Buscar o Crear)</label>
-                        <select id="pos-client-select"></select>
-                        <input type="text" id="pos-client-name" placeholder="O escribir nombre nuevo">
-                        <button class="btn btn-primary" onclick="app.addToCart()">Agregar</button>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h4>Movimientos: Servicios</h4>
+                        <table id="table-dash-services">
+                            <thead><tr><th>Hora</th><th>Servicio</th><th>Monto</th><th>Staff</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
-                    <div style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1.5rem;">
-                        <h4>Carrito</h4>
-                        <div id="cart-list" style="margin: 1rem 0;"></div>
-                        <div style="display:flex; justify-content: space-between; font-weight: 800; font-size: 1.25rem;">
-                            <span>Total</span>
-                            <span id="pos-total-amount">Bs. 0.00</span>
+                    <div class="card">
+                        <h4>Movimientos: Productos</h4>
+                        <table id="table-dash-products">
+                            <thead><tr><th>Hora</th><th>Producto</th><th>Monto</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CAJA VIEW -->
+            <section id="caja" class="view-section hidden">
+                <div class="metrics-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="card" id="caja-open-card">
+                        <h3>Apertura de Caja</h3>
+                        <p style="margin-bottom: 20px; color: var(--text-muted);">Inicia el movimiento del día estableciendo el monto inicial en efectivo.</p>
+                        <label>Monto Inicial (Bs.)</label>
+                        <input type="number" id="caja-monto-inicial" value="0">
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 24px;" onclick="app.openCaja()">ABRIR CAJA AHORA</button>
+                    </div>
+                    <div class="card hidden" id="caja-close-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3>Cierre de Caja</h3>
+                            <button class="btn btn-primary" onclick="app.showModal('expense')" style="background:var(--danger); font-size:0.75rem;">REGISTRAR GASTO</button>
                         </div>
-                        <button class="btn btn-primary" style="margin-top: 1rem; width: 100%;" onclick="app.processSale()">Finalizar Venta</button>
+                        <div class="metrics-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 24px;">
+                            <div class="metric-card" style="padding:10px;"><h5>Inicial</h5><p id="close-ini" style="font-size:1rem;">Bs. 0.00</p></div>
+                            <div class="metric-card" style="padding:10px;"><h5>Ventas (+)</h5><p id="close-sales" style="font-size:1rem; color:var(--success)">Bs. 0.00</p></div>
+                            <div class="metric-card" style="padding:10px;"><h5>Egresos (-)</h5><p id="close-expenses" style="font-size:1rem; color:var(--danger)">Bs. 0.00</p></div>
+                            <div class="metric-card" style="padding:10px;"><h5>Final</h5><p id="close-total" style="font-size:1rem; font-weight:800;">Bs. 0.00</p></div>
+                        </div>
+                        <button class="btn btn-danger" style="width: 100%;" onclick="app.closeCaja()">CERRAR CAJA Y GENERAR REPORTE</button>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- BARBEROS SECTION -->
-        <section id="barberos" class="section hidden">
-            <div class="card">
-                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1rem;">
-                    <h3>Plantilla de Barberos</h3>
-                    <button class="btn btn-primary" onclick="app.showModal('barber')">+ Agregar Barbero</button>
-                </div>
-                <div class="table-container">
-                    <table id="barberos-table">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Nivel / Rango</th>
-                                <th>Comisiones Acumuladas</th>
-                                <th>Ventas Realizadas</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
+                <div class="card" style="margin-top: 24px;">
+                    <h4>Historial de Sesiones</h4>
+                    <table id="table-caja-history">
+                        <thead><tr><th>Apertura</th><th>Cierre</th><th>Monto Inicial</th><th>Total Ventas</th><th>Estado</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- BARBER TYPES SECTION -->
-        <section id="barber-types" class="section hidden">
-            <div class="card">
-                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1rem;">
-                    <h3>Tipos/Niveles de Barbero</h3>
-                    <button class="btn btn-primary" onclick="app.showModal('barberType')">+ Nuevo Tipo</button>
-                </div>
-                <div class="table-container">
-                    <table id="barber-types-table">
-                        <thead>
-                            <tr>
-                                <th>Nivel / Rango</th>
-                                <th>% Comisión Base</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- CLIENTES SECTION -->
-        <section id="clientes" class="section hidden">
-            <div class="card">
-                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1rem;">
-                    <h3>Fidelización de Clientes</h3>
-                    <button class="btn btn-primary" onclick="app.showModal('client')">+ Nuevo Cliente</button>
-                </div>
-                <div class="table-container">
-                    <table id="clientes-table">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Puntos Acumulados</th>
-                                <th>Última Visita</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- REPORTES SECTION -->
-        <section id="reportes" class="section hidden">
-            <div class="card">
-                <h3>Resumen Mensual y Diario</h3>
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <h3>Ventas Mes</h3>
-                        <p class="value" id="monthly-sales">Bs. 0.00</p>
+            <!-- POS VIEW -->
+            <section id="pos" class="view-section hidden">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Terminal de Ventas</h3>
+                        <div style="margin-top:24px;">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:16px;">
+                                <div>
+                                    <label>Nombre (Buscar)</label>
+                                    <input type="text" id="pos-cli-name" list="pos-clients-list" placeholder="Nombre cliente" onchange="app.checkClientByName()" oninput="app.updateClientDatalist()">
+                                    <datalist id="pos-clients-list"></datalist>
+                                </div>
+                                <div><label>Celular</label><input type="text" id="pos-cli-phone" placeholder="Celular" readonly></div>
+                            </div>
+                            <div id="pos-loyalty-info" class="hidden" style="background:rgba(229,178,93,0.1); padding:10px; border-radius:8px; margin-bottom:16px; border:1px solid var(--primary);">
+                                <p style="font-size:0.8rem; font-weight:700; color:var(--primary);">Puntos: <span id="pos-available-points">0</span></p>
+                                <button class="btn btn-primary" style="padding:4px 8px; font-size:0.7rem; margin-top:5px;" onclick="app.redeemPoints()">CANJEAR PUNTOS</button>
+                            </div>
+                            <label>Buscador de Ítem (Servicio/Producto)</label>
+                            <select id="pos-item-select"></select>
+                            <label style="margin-top:16px; display:block;">Colaborador Asignado</label>
+                            <select id="pos-barber-select"></select>
+                            <button class="btn btn-primary" style="margin-top:24px; width:100%;" onclick="app.addToCart()">Añadir al Carrito</button>
+                        </div>
                     </div>
-                    <div class="kpi-card">
-                        <h3>Total Servicios</h3>
-                        <p class="value" id="monthly-services-count">0</p>
+                    <div class="card">
+                        <h3>Resumen de Venta</h3>
+                        <div id="pos-cart-list" style="margin:24px 0; min-height:180px;"></div>
+                        <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1.4rem; color:var(--primary);">
+                            <span>TOTAL</span><span id="pos-total">Bs. 0.00</span>
+                        </div>
+                        <button class="btn btn-primary" style="margin-top:24px; width:100%;" onclick="app.processSale()">PROCESAR PAGO</button>
                     </div>
                 </div>
-                <div class="table-container">
-                    <table id="sales-history">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Cliente</th>
-                                <th>Concepto</th>
-                                <th>Monto</th>
-                                <th>Barbero</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
+            </section>
+
+            <!-- RESERVAS VIEW -->
+            <section id="reservas" class="view-section hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                    <h3>Gestión de Reservas & Disponibilidad</h3>
+                    <div style="display:flex; gap:12px;">
+                        <button class="btn btn-primary" onclick="app.showModal('booking')">+ AGENDAR CITA</button>
+                        <button class="btn btn-primary" style="background:#444;" onclick="app.showSubView('res-calendar')">CALENDARIO</button>
+                        <button class="btn btn-primary" style="background:#444;" id="btn-config-dispo" onclick="app.showSubView('res-config')">CONFIGURAR HORARIOS</button>
+                    </div>
+                </div>
+
+                <!-- SUB-VIEW: CALENDAR DISPLAY -->
+                <div id="subview-res-calendar" class="res-subview">
+                    <div class="calendar-container card">
+                        <div class="calendar-header" style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                            <h4 id="calendar-month-title">Abril 2026</h4>
+                            <div><button onclick="app.prevMonth()" class="btn" style="padding:5px 10px;"><</button> <button onclick="app.nextMonth()" class="btn" style="padding:5px 10px;">></button></div>
+                        </div>
+                        <div class="calendar-grid" id="calendar-grid">
+                            <!-- Días de la semana -->
+                            <div class="cal-day-name">Dom</div><div class="cal-day-name">Lun</div><div class="cal-day-name">Mar</div><div class="cal-day-name">Mie</div><div class="cal-day-name">Jue</div><div class="cal-day-name">Vie</div><div class="cal-day-name">Sab</div>
+                            <!-- Datos dinámicos -->
+                        </div>
+                    </div>
+                    <div class="card" style="margin-top:24px;">
+                        <h4>Próximas Citas</h4>
+                        <table id="reservas-table">
+                            <thead><tr><th>Fecha/Hora</th><th>Cliente</th><th>Servicio</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody id="reservas-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SUB-VIEW: CONFIG AVAILABILITY -->
+                <div id="subview-res-config" class="res-subview hidden">
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid var(--border);">
+                                <h4>Acceso Público</h4>
+                                <label class="switch-container">
+                                    <input type="checkbox" id="public-booking-toggle" onchange="app.togglePublicAccess()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div id="public-link-container" class="hidden" style="margin-bottom:25px; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px;">
+                                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:5px;">Link para Clientes:</p>
+                                <code id="public-url-text" style="font-size:0.8rem; color:var(--primary);">loading...</code>
+                                <button class="btn btn-primary" style="padding:4px 8px; font-size:0.7rem; margin-left:10px;" onclick="app.copyPublicLink()">COPIAR</button>
+                            </div>
+
+                            <h4>Habilitar Horarios Globales</h4>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Selecciona el día de la semana y los horarios que estarán disponibles para reserva.</p>
+                            <label>Día de la Semana</label>
+                            <select id="config-day-select" onchange="app.renderAvailabilityConfig()">
+                                <option value="Monday">Lunes</option>
+                                <option value="Tuesday">Martes</option>
+                                <option value="Wednesday">Miércoles</option>
+                                <option value="Thursday">Jueves</option>
+                                <option value="Friday">Viernes</option>
+                                <option value="Saturday">Sábado</option>
+                                <option value="Sunday">Domingo</option>
+                            </select>
+                            <div id="config-slots-container" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:20px;">
+                                <!-- Checkboxes dinámicos -->
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h4>Vista Previa de Disponibilidad</h4>
+                            <div id="config-preview-list" style="max-height: 300px; overflow-y: auto; font-size: 0.9rem;">
+                                <!-- Lista de horarios activos -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- USERS VIEW -->
+            <section id="users" class="view-section hidden">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                            <h3>Personal y Usuarios</h3>
+                            <button class="btn btn-primary" onclick="app.showModal('user')">+ REGISTRAR</button>
+                        </div>
+                        <table id="users-table">
+                            <thead><tr><th>Nombre</th><th>Rol</th><th>Nivel</th><th>Acciones</th></tr></thead>
+                            <tbody id="users-table-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                            <h3>Tipos de Barbero & Comisiones</h3>
+                            <button class="btn btn-primary" onclick="app.showModal('tier')">+ NUEVO TIPO</button>
+                        </div>
+                        <table id="tiers-table">
+                            <thead><tr><th>Nivel/Tipo</th><th>Comisión</th><th>Acciones</th></tr></thead>
+                            <tbody id="tiers-table-body"></tbody>
+                        </table>
+                        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:16px;">* La comisión se aplica automáticamente sobre los servicios realizados.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ROLES & PERMISOS VIEW -->
+            <section id="roles" class="view-section hidden">
+                <h3>Roles y Niveles de Acceso</h3>
+                <div id="roles-permissions-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:24px; margin-top:24px;"></div>
+            </section>
+
+            <!-- INVENTORY VIEW -->
+            <section id="inventory" class="view-section hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                    <h3>Almacén e Inventario</h3>
+                    <button class="btn btn-primary" onclick="app.showModal('product')">+ NUEVO PRODUCTO</button>
+                </div>
+                <div class="card">
+                    <table id="inventory-table">
+                        <thead><tr><th>Producto</th><th>Stock</th><th>Precio</th><th>Acciones</th></tr></thead>
+                        <tbody id="inventory-table-body"></tbody>
                     </table>
                 </div>
-            </div>
-        </section>
+            </section>
+
+            <!-- SERVICES VIEW -->
+            <section id="services" class="view-section hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                    <h3>Catálogo de Servicios</h3>
+                    <button class="btn btn-primary" onclick="app.showModal('service')">+ NUEVO SERVICIO</button>
+                </div>
+                <div class="card">
+                    <table id="services-table">
+                        <thead><tr><th>Servicio</th><th>Duración</th><th>Precio</th><th>Acciones</th></tr></thead>
+                        <tbody id="services-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="reports" class="view-section hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                    <h3>Inteligencia de Negocio & Reportes</h3>
+                    <div style="display:flex; gap:12px;">
+                        <button class="btn btn-primary" onclick="app.showModal('expense')" style="background:var(--danger);"><i class="fas fa-minus-circle"></i> REGISTRAR GASTO</button>
+                        <button class="btn btn-primary" style="background:#444;" onclick="app.showReportSubView('bi')"><i class="fas fa-chart-pie"></i> ANÁLISIS ESTRATÉGICO</button>
+                        <button class="btn btn-primary" style="background:#444;" onclick="app.showReportSubView('daily')"><i class="fas fa-list"></i> VENTAS DIARIAS</button>
+                        <button class="btn btn-primary" style="background:#cc0000;" onclick="app.downloadReportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                    </div>
+                </div>
+
+                <!-- SUBVIEW: STRATEGIC BI -->
+                <div id="report-sub-bi" class="hidden">
+                    <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                        <div class="metric-card" style="background:var(--bg-card); border: 1px solid var(--border);">
+                            <h4 style="color:var(--text-muted); font-size:0.75rem;">VENTA ANUAL (BS.)</h4>
+                            <p class="value" id="bi-annual-total">Bs. 0.00</p>
+                        </div>
+                        <div class="metric-card" style="background:var(--bg-card); border: 1px solid var(--border);">
+                            <h4 style="color:var(--text-muted); font-size:0.75rem;">PROMEDIO DIARIO</h4>
+                            <p class="value" id="bi-daily-avg">Bs. 0.00</p>
+                        </div>
+                        <div class="metric-card" style="background:var(--bg-card); border: 1px solid var(--border);">
+                            <h4 style="color:var(--text-muted); font-size:0.75rem;">GANANCIA MENSUAL NETA</h4>
+                            <p class="value" id="bi-monthly-profit" style="color:var(--success)">Bs. 0.00</p>
+                        </div>
+                        <div class="metric-card" style="background:var(--bg-card); border: 1px solid var(--border);">
+                            <h4 style="color:var(--text-muted); font-size:0.75rem;">GANANCIA ANUAL NETA</h4>
+                            <p class="value" id="bi-annual-profit" style="color:var(--success)">Bs. 0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid" style="margin-top:24px;">
+                        <div class="card">
+                            <h4><i class="fas fa-cut"></i> Top Servicios</h4>
+                            <div id="bi-top-services" style="margin-top:15px;"></div>
+                        </div>
+                        <div class="card">
+                            <h4><i class="fas fa-shopping-bag"></i> Top Productos</h4>
+                            <div id="bi-top-products" style="margin-top:15px;"></div>
+                        </div>
+                        <div class="card">
+                            <h4><i class="fas fa-scissors"></i> Mejores Barberos</h4>
+                            <div id="bi-top-barbers" style="margin-top:15px;"></div>
+                        </div>
+                        <div class="card">
+                            <h4><i class="fas fa-medal"></i> Clientes más Fieles</h4>
+                            <div id="bi-top-clients" style="margin-top:15px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBVIEW: DAILY SALES -->
+                <div id="report-sub-daily">
+                    <div style="display:flex; gap:16px; margin:24px 0;">
+                        <input type="date" id="rep-start" style="max-width: 200px;">
+                        <input type="date" id="rep-end" style="max-width: 200px;">
+                        <button class="btn btn-primary" onclick="app.generateReport()">FILTRAR LISTADO</button>
+                    </div>
+                    <div id="report-content" class="card">Seleccione un rango de fechas para ver el detalle de transacciones.</div>
+                </div>
+            </section>
+
+            <!-- LOYALTY VIEW -->
+            <section id="loyalty" class="view-section hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                    <h3>Programa de Fidelización</h3>
+                    <div style="display:flex; gap:12px;">
+                        <button class="btn btn-primary" id="btn-loyalty-config" style="background:#444;" onclick="app.showLoyaltySubView('config')">CONFIGURACIÓN</button>
+                        <button class="btn btn-primary" style="background:#444;" onclick="app.showLoyaltySubView('stats')">ESTADÍSTICAS & RANKING</button>
+                    </div>
+                </div>
+
+                <!-- SUBVIEW: RANKING & SEARCH -->
+                <div id="loyalty-sub-stats">
+                    <div style="display:flex; gap:16px; margin-bottom:24px;">
+                        <input type="text" id="loyalty-search" placeholder="Buscar por celular..." style="width:250px; margin:0;">
+                        <button class="btn btn-primary" onclick="app.searchClientLoyalty()">CONSULTAR PUNTOS</button>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h4>Puntos Acumulados</h4>
+                            <div id="loyalty-policy-desc" style="font-size:0.8rem; color:var(--text-muted); margin-bottom:20px;"></div>
+                            <div id="loyalty-result" style="text-align:center; padding:30px 0;">
+                                <i class="fas fa-star" style="font-size:3rem; color:var(--primary); margin-bottom:15px; opacity:0.3;"></i>
+                                <p>Ingrese un número de celular para ver beneficios.</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h4>Ranking de Clientes Top</h4>
+                            <table id="loyalty-table">
+                                <thead><tr><th>Cliente</th><th>Celular</th><th>Puntos</th></tr></thead>
+                                <tbody id="loyalty-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBVIEW: CONFIG (ADMIN ONLY) -->
+                <div id="loyalty-sub-config" class="hidden">
+                    <div class="card" style="max-width: 600px;">
+                        <h4>Configuración de Beneficios</h4>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:24px;">Establece cómo se ganan y gastan los puntos. Los cambios se aplicarán a partir de este momento.</p>
+                        
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:24px;">
+                            <div>
+                                <label>Gana 1 Punto por cada (Bs.)</label>
+                                <input type="number" id="loyalty-config-spend" value="10">
+                            </div>
+                            <div>
+                                <label>Valor de 1 Punto (Bs.)</label>
+                                <input type="number" id="loyalty-config-value" value="1">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%;" onclick="app.saveLoyaltySettings()">ACTUALIZAR REGLAS DEL PROGRAMA</button>
+                    </div>
+                </div>
+            </section>
+            <!-- CLIENTS VIEW -->
+            <section id="clients" class="view-section hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                    <h3>Base de Datos de Clientes</h3>
+                    <button class="btn btn-primary" onclick="app.showModal('client')">+ REGISTRAR CLIENTE</button>
+                </div>
+                <div class="card">
+                    <table id="clients-table">
+                        <thead><tr><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Puntos</th><th>Acciones</th></tr></thead>
+                        <tbody id="clients-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
     </main>
 
-    <!-- MODALES DINAMICOS -->
-    <div id="modal-container" class="modal-overlay hidden">
-        <div class="modal">
-            <h3 id="modal-title">Formulario</h3>
+    <!-- PUBLIC BOOKING SCREEN -->
+    <div id="public-booking-screen" class="login-overlay hidden">
+        <div class="login-card" style="max-width: 600px; text-align: left;">
+            <div style="text-align:center; margin-bottom:30px;">
+                <div class="logo"><i class="fas fa-scissors"></i></div>
+                <h2 style="color:var(--primary);">Reserva tu Cita</h2>
+                <p style="color:var(--text-muted);">Agenda tu próximo corte en segundos.</p>
+            </div>
+            
+            <div id="public-booking-form">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                    <div><label>Nombre</label><input type="text" id="pb-name" placeholder="Tu nombre"></div>
+                    <div><label>Celular</label><input type="text" id="pb-phone" placeholder="777..."></div>
+                </div>
+                <div style="margin-top:16px;">
+                    <label>Fecha del Servicio</label>
+                    <input type="date" id="pb-date" onchange="app.updatePublicSlots()">
+                </div>
+                <div style="margin-top:16px;">
+                    <label>Hora Disponible</label>
+                    <select id="pb-time"></select>
+                </div>
+                <div style="margin-top:16px;">
+                    <label>Servicio Deseado</label>
+                    <select id="pb-srv"></select>
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-top:30px; padding:15px;" onclick="app.submitPublicBooking()">CONFIRMAR RESERVA</button>
+                <p style="text-align:center; margin-top:20px; font-size:0.8rem; color:var(--text-muted);">¿Eres administrador? <a href="index.html" style="color:var(--primary); font-weight:700;">Iniciar Sesión</a></p>
+            </div>
+            
+            <div id="public-booking-success" class="hidden" style="text-align:center; padding:40px 0;">
+                <i class="fas fa-check-circle" style="font-size:4rem; color:var(--success); margin-bottom:20px;"></i>
+                <h3>¡Cita Agendada!</h3>
+                <p style="color:var(--text-muted); margin-top:10px;">Te esperamos en la fecha y hora seleccionada.</p>
+                <button class="btn btn-primary" style="margin-top:30px;" onclick="location.reload()">AGENDAR OTRA</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL (Standardized) -->
+    <div id="modal-container" class="login-overlay hidden">
+        <div class="login-card" style="text-align: left; max-width: 500px;">
+            <h3 id="modal-title" style="margin-bottom: 24px; color: var(--primary);">Formulario</h3>
             <div id="modal-content"></div>
-            <div style="display:flex; gap: 10px; margin-top: 1.5rem; justify-content: flex-end;">
-                <button class="btn btn-secondary" onclick="app.hideModal()">Cancelar</button>
-                <button class="btn btn-primary" id="modal-save-btn">Guardar</button>
+            <div style="display:flex; gap: 12px; margin-top: 32px;">
+                <button class="btn btn-primary" id="modal-save-btn" style="flex: 1;">GUARDAR</button>
+                <button class="btn btn-danger" onclick="app.hideModal()" style="flex: 1;">CANCELAR</button>
             </div>
         </div>
     </div>
